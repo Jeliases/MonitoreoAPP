@@ -5,6 +5,8 @@ import com.example.monitoreoapp.data.model.ForgotRequest
 import com.example.monitoreoapp.data.model.ForgotResponse
 import com.example.monitoreoapp.data.model.LoginRequest
 import com.example.monitoreoapp.data.model.LoginResponse
+import com.example.monitoreoapp.data.model.Notification
+import com.example.monitoreoapp.data.model.NotificationResponse
 import com.example.monitoreoapp.data.model.VehicleResponse
 import retrofit2.Response
 import retrofit2.http.Body
@@ -21,4 +23,8 @@ interface ApiService {
 
     @GET("vehicles")
     suspend fun getVehicles(): Response<VehicleResponse>
+
+    @GET("notifications")
+    suspend fun getNotifications(): Response<NotificationResponse>
+
 }

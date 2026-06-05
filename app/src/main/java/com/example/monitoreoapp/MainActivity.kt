@@ -10,9 +10,12 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.monitoreoapp.ui.screens.BillingScreen
 import com.example.monitoreoapp.ui.screens.ForgotScreen
 import com.example.monitoreoapp.ui.screens.LoginScreen
 import com.example.monitoreoapp.ui.screens.MapScreen
+import com.example.monitoreoapp.ui.screens.NotifyScreen
+import com.example.monitoreoapp.ui.screens.ProfileScreen
 import com.example.monitoreoapp.ui.theme.MonitoreoAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -31,7 +34,9 @@ class MainActivity : ComponentActivity() {
                         composable("login") {
                             LoginScreen(
                                 onLoginSuccess = {
-                                    navController.navigate("mapa")
+                                    navController.navigate("mapa") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
                                 },
                                 onNavigateToForgot = {
                                     navController.navigate("recuperar")
@@ -49,10 +54,68 @@ class MainActivity : ComponentActivity() {
 
                         composable("mapa") {
                             MapScreen(
+                                onNavigateToBilling = {
+                                    navController.navigate("facturas") { popUpTo(0) }
+                                },
+                                onNavigateToProfile = {
+                                    navController.navigate("perfil") { popUpTo(0) }
+                                },
+                                onNavigateToNotify = {
+                                    navController.navigate("notificaciones") { popUpTo(0) }
+                                },
                                 onLogout = {
-                                    navController.navigate("login") {
-                                        popUpTo("login") { inclusive = true }
-                                    }
+                                    navController.navigate("login") { popUpTo(0) }
+                                }
+                            )
+                        }
+
+                        composable("facturas") {
+                            BillingScreen(
+                                onNavigateToMap = {
+                                    navController.navigate("mapa") { popUpTo(0) }
+                                },
+                                onNavigateToProfile = {
+                                    navController.navigate("perfil") { popUpTo(0) }
+                                },
+                                onNavigateToNotify = {
+                                    navController.navigate("notificaciones") { popUpTo(0) }
+                                },
+                                onLogout = {
+                                    navController.navigate("login") { popUpTo(0) }
+                                }
+                            )
+                        }
+
+                        composable("perfil") {
+                            ProfileScreen(
+                                onNavigateToMap = {
+                                    navController.navigate("mapa") { popUpTo(0) }
+                                },
+                                onNavigateToBilling = {
+                                    navController.navigate("facturas") { popUpTo(0) }
+                                },
+                                onNavigateToNotify = {
+                                    navController.navigate("notificaciones") { popUpTo(0) }
+                                },
+                                onLogout = {
+                                    navController.navigate("login") { popUpTo(0) }
+                                }
+                            )
+                        }
+
+                        composable("notificaciones") {
+                            NotifyScreen(
+                                onNavigateToMap = {
+                                    navController.navigate("mapa") { popUpTo(0) }
+                                },
+                                onNavigateToBilling = {
+                                    navController.navigate("facturas") { popUpTo(0) }
+                                },
+                                onNavigateToProfile = {
+                                    navController.navigate("perfil") { popUpTo(0) }
+                                },
+                                onLogout = {
+                                    navController.navigate("login") { popUpTo(0) }
                                 }
                             )
                         }

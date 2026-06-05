@@ -1,12 +1,15 @@
 package com.example.monitoreoapp.ui.screens
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.LocalShipping
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
@@ -15,46 +18,33 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.monitoreoapp.R
-import com.example.monitoreoapp.data.model.Vehicle
-import com.example.monitoreoapp.ui.viewmodels.MapState
-import com.example.monitoreoapp.ui.viewmodels.MapViewModel
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MarkerComposable
-import com.google.maps.android.compose.MarkerState
-import com.google.maps.android.compose.rememberCameraPositionState
+import com.example.monitoreoapp.data.model.Notification
+import com.example.monitoreoapp.ui.viewmodels.NotifyState
+import com.example.monitoreoapp.ui.viewmodels.NotifyViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MapScreen(
-    viewModel: MapViewModel = viewModel(),
+fun NotifyScreen(
+    viewModel: NotifyViewModel = viewModel(),
+    onNavigateToMap: () -> Unit,
     onNavigateToBilling: () -> Unit,
     onNavigateToProfile: () -> Unit,
-    onNavigateToNotify: () -> Unit,
     onLogout: () -> Unit
 ) {
-    val mapState by viewModel.mapState.collectAsState()
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(LatLng(-12.060, -77.030), 13f)
-    }
+    val notifyState by viewModel.notifyState.collectAsState()
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = "Monitorea tu Envío",
+                        text = "Notificaciones",
                         color = Color.White,
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center
@@ -79,10 +69,7 @@ fun MapScreen(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(
-                        onClick = { },
-                        modifier = Modifier.background(MaterialTheme.colorScheme.tertiary, RoundedCornerShape(12.dp))
-                    ) {
+                    IconButton(onClick = onNavigateToMap) {
                         Icon(Icons.Default.LocalShipping, contentDescription = null, tint = Color.White)
                     }
                     IconButton(onClick = onNavigateToBilling) {
@@ -91,7 +78,10 @@ fun MapScreen(
                     IconButton(onClick = onNavigateToProfile) {
                         Icon(Icons.Default.Person, contentDescription = null, tint = Color.White)
                     }
-                    IconButton(onClick = onNavigateToNotify) {
+                    IconButton(
+                        onClick = { },
+                        modifier = Modifier.background(MaterialTheme.colorScheme.tertiary, RoundedCornerShape(12.dp))
+                    ) {
                         Icon(Icons.Default.Notifications, contentDescription = null, tint = Color.White)
                     }
                 }
@@ -99,30 +89,26 @@ fun MapScreen(
         }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            when (mapState) {
-                is MapState.Loading -> {
+            when (notifyState) {
+                is NotifyState.Loading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-                is MapState.Error -> {
+                is NotifyState.Error -> {
                     Text(
-                        text = (mapState as MapState.Error).message,
+                        text = (notifyState as NotifyState.Error).message,
                         modifier = Modifier.align(Alignment.Center),
                         color = MaterialTheme.colorScheme.error
                     )
                 }
-                is MapState.Success -> {
-                    val vehicles = (mapState as MapState.Success).vehicles
-                    GoogleMap(
+                is NotifyState.Success -> {
+                    val notifications = (notifyState as NotifyState.Success).notifications
+                    LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        cameraPositionState = cameraPositionState
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        vehicles.forEach { vehicle ->
-                            MarkerComposable(
-                                state = MarkerState(position = LatLng(vehicle.latitude, vehicle.longitude)),
-                                anchor = Offset(0.5f, 0.5f)
-                            ) {
-                                CustomVehicleMarker(vehicle = vehicle)
-                            }
+                        items(notifications) { notification ->
+                            NotificationCard(notification)
                         }
                     }
                 }
@@ -132,42 +118,46 @@ fun MapScreen(
 }
 
 @Composable
-fun CustomVehicleMarker(vehicle: Vehicle) {
-    val isGreen = vehicle.status == "green"
-    val carImage = if (isGreen) R.drawable.carro_verde else R.drawable.carro_rojo
-    val mainColor = if (isGreen) Color(0xFF00C853) else MaterialTheme.colorScheme.error
-    val speedColor = if (isGreen) Color(0xFF00C853) else Color.DarkGray
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
+fun NotificationCard(notification: Notification) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.tertiary),
+        color = Color.White
     ) {
-        Image(
-            painter = painterResource(id = carImage),
-            contentDescription = null,
-            modifier = Modifier
-                .size(60.dp)
-                .rotate(vehicle.angle)
-        )
-        Surface(
-            shape = RoundedCornerShape(12.dp),
-            border = BorderStroke(2.dp, mainColor),
-            color = Color.White,
-            modifier = Modifier.padding(top = 4.dp)
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = vehicle.plate,
-                color = mainColor,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
-            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Compra: ${notification.invoiceNumber}",
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "📦 ${notification.status}",
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = 14.sp
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "🕒 ${notification.createdAt}",
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = 14.sp
+                )
+            }
+            IconButton(
+                onClick = { },
+                modifier = Modifier
+                    .size(48.dp)
+                    .background(Color(0xFFF00101), CircleShape)
+            ) {
+                Icon(Icons.Default.Delete, contentDescription = null, tint = Color.White)
+            }
         }
-        Text(
-            text = vehicle.speed,
-            color = speedColor,
-            fontWeight = FontWeight.Bold,
-            fontSize = 14.sp,
-            modifier = Modifier.padding(top = 4.dp)
-        )
     }
 }
