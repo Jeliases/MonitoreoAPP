@@ -40,6 +40,21 @@ android {
 }
 
 dependencies {
+
+    //SIRVE PARA CONSUMIR API´S REST
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    //SIRVE PARA LOS INTERCEPTOR( AYUDA A VER SI HAY FALLOS Y VERLOS EN  CONSOLA)
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
+    //VieModels ( para los screens )
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+
+    //GoogleMaps
+    implementation("com.google.maps.android:maps-compose:4.3.3")
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
