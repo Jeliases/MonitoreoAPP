@@ -41,7 +41,7 @@ class LoginViewModel: ViewModel(){
                 if (response.isSuccessful && response.body() != null){
                     val loginResponse = response.body()!!
 
-                    if(loginResponse.succes && loginResponse.data != null){
+                    if(loginResponse.success && loginResponse.data != null){
                         _loginState.value = LoginState.Success(loginResponse.data.tokenValue)
                     } else{
                         _loginState.value = LoginState.Error(loginResponse.message)
